@@ -14,10 +14,10 @@ class PostController extends Controller
     public function index()
     {
         
-        $posts = Post::orderBy('created_at','desc')->get();
-        $categories = Category::get();
-
-        return view('dashboard',compact('posts','categories'));
+        $posts = Post::orderBy('created_at','desc')->simplePaginate(5);
+        
+        
+        return view('dashboard',compact('posts'));
     }
 
     /**
