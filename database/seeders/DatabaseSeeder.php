@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Support\Str;
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -17,6 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         User::factory()->create([
             'name' => 'Test Joe',
+            'username' => Str::slug('Test Joe'),
             'email' => 'test@example.com',
         ]);
 
