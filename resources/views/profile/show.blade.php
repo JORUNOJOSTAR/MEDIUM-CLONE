@@ -17,7 +17,7 @@
                             @endforelse
                         </div>
                     </div>
-                    <x-follow-ctr :user="$user">
+                    <div class="w-[320px] border-l px-8">
                         <x-user-avatar :user="$user" size="w-24 h-24" />
                         <h3>{{ $user->name }}</h3>
                         <p class="text-gray-500">
@@ -27,15 +27,17 @@
                             {{ $user->bio }}
                         </p>
                         @if (auth()->user() && auth()->user()->id !== $user->id)
-                            <div class="mt-4">
-                                <button @click="follow()" 
-                                class="rounded-full px-4 py-2 text-white" 
-                                x-text="following?'Unfollow':'Follow'"
-                                :class="following?'bg-red-600':'bg-emerald-600'">
-                                </button>
-                            </div>
+                            <x-follow-ctr :user="$user" class="">
+                                <div class="mt-4">
+                                    <button @click="follow()" 
+                                    class="rounded-full px-4 py-2 text-white" 
+                                    x-text="following?'Unfollow':'Follow'"
+                                    :class="following?'bg-red-600':'bg-emerald-600'">
+                                    </button>
+                                </div>
+                            </x-follow-ctr>
                         @endif
-                    </x-follow-ctr>
+                    </div>
                 </div>
             </div>
         </div>
