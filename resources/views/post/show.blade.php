@@ -28,7 +28,7 @@
                 {{-- User Avatar --}}
 
                 {{-- Clap Section --}}
-                <x-clap-button />
+                <x-clap-button :post="$post"/>
                 {{-- Clap Section --}}
 
                 {{-- Content Section --}}
@@ -47,7 +47,7 @@
                 </div>
 
                 {{-- Clap Section --}}
-                <x-clap-button />
+                <x-clap-button :post="$post"/>
                 {{-- Clap Section --}}
             </div>
         </div>
