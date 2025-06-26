@@ -23,12 +23,11 @@
                         <div class="flex gap-2 text-sm text-gray-500">
                             {{ $post->readTime() }} min read
                             &middot;
-                            {{ $post->created_at->format('M d, Y') }}
+                            {{ $post->getCreatedDate() }}
                         </div>
                     </div>
                 </div>
                 {{-- User Avatar --}}
-
                 {{-- Clap Section --}}
                 <x-clap-button :post="$post" />
                 {{-- Clap Section --}}
