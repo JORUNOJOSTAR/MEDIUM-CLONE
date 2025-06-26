@@ -7,18 +7,18 @@
                 <div class="flex gap-4">
                     <x-user-avatar :user="$post->user" />
                     <div>
-                        
-                            <x-follow-ctr :user="$post->user" class="flex gap-2">
-                                <a href="{{ route('profile.show', $post->user) }}" class="hover:underline">
-                                    {{ $post->user->name }}
-                                </a>
-                                @if (auth()->user() && auth()->user()->id !== $post->user->id)
+
+                        <x-follow-ctr :user="$post->user" class="flex gap-2">
+                            <a href="{{ route('profile.show', $post->user) }}" class="hover:underline">
+                                {{ $post->user->name }}
+                            </a>
+                            @if (auth()->user() && auth()->user()->id !== $post->user->id)
                                 &middot;
                                 <button x-text="following ? 'Unfollow' : 'Follow'"
                                     :class="following ? 'text-red-600' : 'text-emerald-600'" @click="follow()"></button>
-                                @endif
-                            </x-follow-ctr>
-                        
+                            @endif
+                        </x-follow-ctr>
+
 
                         <div class="flex gap-2 text-sm text-gray-500">
                             {{ $post->readTime() }} min read
@@ -28,6 +28,20 @@
                     </div>
                 </div>
                 {{-- User Avatar --}}
+                @if (Auth::id() === $post->user_id)
+                    <div class="py-4 mt-8 border-t border-b border-gray-200">
+                        <x-primary-button>
+                            Edit Post
+                        </x-primary-button>
+                        <form action="{{ route('post.destory', $post) }}" method="post" class="inline-block">
+                            @csrf
+                            @method('delete')
+                            <x-danger-button>
+                                Delete Post
+                            </x-danger-button>
+                        </form>
+                    </div>
+                @endif
                 {{-- Clap Section --}}
                 <x-clap-button :post="$post" />
                 {{-- Clap Section --}}

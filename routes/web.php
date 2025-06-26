@@ -29,6 +29,9 @@ Route::middleware(['auth','verified'])->group(function(){
     Route::post('/post/create',[PostController::class,'store'])
     ->name('post.store');
 
+    Route::delete('/post/{post}',[PostController::class,'destroy'])
+    ->name('post.destory');
+
     Route::get('/my-posts',[PostController::class,'myPosts'])
     ->name('myPosts');
 
