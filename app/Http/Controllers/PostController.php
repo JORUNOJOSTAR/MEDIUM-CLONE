@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PostCreateRequest;
+use App\Http\Requests\PostUpdateRequest;
 use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -16,11 +17,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        \DB::listen(function ($query){
-            \Log::info($query->sql);
-        });
         $user = auth()->user();
         $query = Post::with(['user','media'])
+                ->where('published_at','<=',now())
                 ->withCount('claps')
                 ->latest();
         // $query = Post::latest();
@@ -50,14 +49,7 @@ class PostController extends Controller
     {
         $data = $request->validated();
         
-        // $image = $data['image'];
-        
         $data['user_id'] = Auth::id();
-        $data['slug'] = Str::slug($data['title']);
-        
-        // $imagePath = $image->store('posts','public');
-        // $data['image'] = $imagePath;
-
 
         $post = Post::create($data);
         $post->addMediaFromRequest('image')
@@ -82,15 +74,31 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        if($post->user_id!==Auth::id()){
+            abort(403);
+        }
+        $categories = Category::get();
+        return view('post.edit',[
+            'post'=> $post,
+            'categories' => $categories
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(PostUpdateRequest $request, Post $post)
     {
-        //
+        if($post->user_id!==Auth::id()){
+            abort(403);
+        }
+        $data = $request->validated();
+        $post->update($data);
+        if($data['image'] ?? false){
+            $post->addMediaFromRequest('image')
+            ->toMediaCollection();
+        }
+        return redirect()->route('myPosts');
     }
 
     /**
@@ -107,6 +115,7 @@ class PostController extends Controller
 
     public function category(Category $category){
         $posts = $category->posts()
+                ->where('published_at','<=',now())
                 ->with(['user','media'])
                 ->withCount('claps')
                 ->latest()

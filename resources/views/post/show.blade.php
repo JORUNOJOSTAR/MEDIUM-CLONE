@@ -30,7 +30,7 @@
                 {{-- User Avatar --}}
                 @if (Auth::id() === $post->user_id)
                     <div class="py-4 mt-8 border-t border-b border-gray-200">
-                        <x-primary-button>
+                        <x-primary-button href="{{ route('post.edit',parameters: $post->slug) }}">
                             Edit Post
                         </x-primary-button>
                         <form action="{{ route('post.destory', $post) }}" method="post" class="inline-block">

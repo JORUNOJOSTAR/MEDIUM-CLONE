@@ -8,30 +8,40 @@ use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class Post extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use HasSlug;
     protected $fillable = [
-        'title', 
-        'content', 
-        // 'image', 
-        'slug', 
-        'user_id', 
-        'category_id', 
-        'published_at'
+        'title',
+        'content',
+        // 'image',
+        'slug',
+        'user_id',
+        'category_id',
+        'published_at',
     ];
 
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
+    }
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this
-            ->addMediaConversion('preview')
-            ->width(400);
-            
-        $this
-            ->addMediaConversion('large')
-            ->width(1200);
+        $this->addMediaConversion('preview')->width(400);
+
+        $this->addMediaConversion('large')->width(1200);
+    }
+
+    public function registerMediaCollections():void{
+        $this->addMediaCollection('default')
+            ->singleFile();
     }
 
     public function user()
@@ -56,17 +66,18 @@ class Post extends Model implements HasMedia
         return max(1, $minutes);
     }
 
-    public function imageUrl($conversionName='')
-    {   
+    public function imageUrl($conversionName = '')
+    {
         $media = $this->getFirstMedia();
-        if($media?->hasGeneratedConversion($conversionName)){
+        if ($media?->hasGeneratedConversion($conversionName)) {
             return $media->getUrl($conversionName);
         }
-            
+
         return $media?->getUrl();
     }
 
-    public function getCreatedDate(){
+    public function getCreatedDate()
+    {
         return $this->created_at->format('M d, Y');
     }
 }
