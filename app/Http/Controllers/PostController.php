@@ -6,9 +6,8 @@ use App\Http\Requests\PostCreateRequest;
 use App\Http\Requests\PostUpdateRequest;
 use App\Models\Category;
 use App\Models\Post;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+
 
 class PostController extends Controller
 {
@@ -64,6 +63,10 @@ class PostController extends Controller
      */
     public function show(String $username,Post $post)
     {
+        $is_owner = $post->user_id ===Auth::id();
+        if($post->published_at>now() && !$is_owner){
+            abort(404);
+        }
         return view('post.show',[
             'post' => $post
         ]);
