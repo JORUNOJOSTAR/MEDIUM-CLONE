@@ -17,16 +17,22 @@ class PostController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = Post::with(['user','media'])
+        $posts = Post::with(['user','media'])
                 ->where('published_at','<=',now())
                 ->withCount('claps')
-                ->latest();
-        // $query = Post::latest();
-        if($user){
-            $ids = $user->following()->pluck('users.id');
-            $query->whereIn('user_id',$ids);
-        }
-        $posts = $query->simplePaginate(5);
+                ->latest()->simplePaginate(5);
+        return view('post.index',compact('posts'));
+    }
+
+    public function followings(){
+        $user = auth()->user();
+        $ids = $user->following()->pluck('users.id');
+        $posts = Post::with(['user','media'])
+                ->where('published_at','<=',now())
+                ->withCount('claps')
+                ->whereIn('user_id',$ids)
+                ->latest()
+                ->simplePaginate(5);
         return view('post.index',compact('posts'));
     }
 

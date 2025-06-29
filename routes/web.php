@@ -20,6 +20,8 @@ Route::get('/category/{category}', [PostController::class, 'category'])->name('p
 Route::get('/@{username}/{post:slug}', [PostController::class, 'show'])->name('post.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/followings',[PostController::class,'followings'])->name('post.followings');
+    
     Route::get('/post/create', [PostController::class, 'create'])->name('post.create');
 
     Route::post('/post/create', [PostController::class, 'store'])->name('post.store');
