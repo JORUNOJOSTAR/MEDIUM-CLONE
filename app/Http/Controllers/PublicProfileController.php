@@ -9,7 +9,9 @@ class PublicProfileController extends Controller
 {
     public function show(Request $request,User $user){
         $posts = $user->posts()
-                ->where('published_at','<=',now())
+                ->when(auth()->id() !== $user->id, function ($query) {
+                    $query->where('published_at', '<=', now());
+                })
                 ->latest()->paginate();
         
         return view('profile.show',[
