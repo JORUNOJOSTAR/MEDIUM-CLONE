@@ -64,11 +64,6 @@ class PostController extends Controller
      */
     public function show(String $username,Post $post)
     {
-        $is_author = $post->user_id === Auth::id();
-        if($post->published_at>now() && !$is_author){
-            abort(404);
-        }
-
         return view('post.show',[
             'post' => $post
         ]);
@@ -120,7 +115,7 @@ class PostController extends Controller
 
     public function category(Category $category){
         $posts = $category->posts()
-                ->where('published_at','<=',value: now())
+                ->where('published_at','<=',now())
                 ->with(['user','media'])
                 ->withCount('claps')
                 ->latest()
