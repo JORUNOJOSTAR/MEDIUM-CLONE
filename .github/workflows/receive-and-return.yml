@@ -1,0 +1,39 @@
+name: Receive and Return CVE
+
+on:
+    repository_dispatch:
+        types: [ping_cve]
+    
+jobs:
+    return:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout target-repo main branch 
+              uses: actions/checkout@v4
+              with:
+                ref: main
+                fetch-depth: 1
+
+            - name: Extract CVE
+              run: |
+                echo "${{ github.event.client_payload.cve}}" > cve.txt
+
+            - name: Prepare markdown
+              run: |
+                mkdir output
+                echo "# CVE Report" > output/report-${{github.event.client_payload.cve}}.md
+                echo "CVE: ${{github.event.client_payload.cve}}" >> output/report-${{github.event.client_payload.cve}}.md
+                echo "" >> output/report-${{github.event.client_payload.cve}}.md
+                echo "Generated from ${{ github.event.repository.name }} at $(date)" >> output/report-${{ github.event.client_payload.cve }}.md
+
+            - name: Push to report-repo
+              run: |
+                git clone "https://x-access-token:${{secrets.REPORT_REPO_WRITE_TOKEN}}@github.com/JORUNOJOSTAR/VULN-REPORT-TEST.git" report
+                cp output/cve.md report/$(date)/cve-${{github.event.client_payload.cve}}.md
+                cd report
+                git config user.name "report-bot"
+                git config user.email "bot@example.com"                
+                git add .
+                git commit -m "CVE returned from target-repo"
+                git push
