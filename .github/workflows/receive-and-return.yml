@@ -9,15 +9,28 @@ jobs:
         runs-on: ubuntu-latest
         
         steps:
-            - name: Echo CVE into file
+            - name: Checkout target-repo main branch 
+              uses: actions/checkout@v4
+              with:
+                ref: main
+                fetch-depth: 1
+
+            - name: Extract CVE
+              run: |
+                echo "${{ github.event.client_payload.cve}}" > cve.txt
+
+            - name: Prepare markdown
               run: |
                 mkdir output
-                echo "Received CVE: ${{github.event.client_payload.cve}}" > output/cve.md
+                echo "# CVE Report" > output/report-${{github.event.client_payload.cve}}.md
+                echo "CVE: ${{github.event.client_payload.cve}}" >> output/report-${{github.event.client_payload.cve}}.md
+                echo "" >> output/report-${{github.event.client_payload.cve}}.md
+                echo "Generated from ${{ github.event.repository.name }} at $(date)" >> output/report-${{ github.event.client_payload.cve }}.md
 
-            - name: Send file back to report-repo as commit
+            - name: Push to report-repo
               run: |
                 git clone "https://x-access-token:${{secrets.REPORT_REPO_WRITE_TOKEN}}@github.com/JORUNOJOSTAR/VULN-REPORT-TEST.git" report
-                cp output/cve.md report/cve-${{github.event.client_payload.cve}}.md
+                cp output/cve.md report/$(date)/cve-${{github.event.client_payload.cve}}.md
                 cd report
                 git config user.name "report-bot"
                 git config user.email "bot@example.com"                
