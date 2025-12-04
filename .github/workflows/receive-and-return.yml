@@ -30,7 +30,12 @@ jobs:
             - name: Push to report-repo
               run: |
                 git clone "https://x-access-token:${{secrets.REPORT_REPO_WRITE_TOKEN}}@github.com/JORUNOJOSTAR/VULN-REPORT-TEST.git" report
-                cp output/cve.md report/$(date)/cve-${{github.event.client_payload.cve}}.md
+
+                DATE=$(date +"%Y-%m-%d")
+                mkdir -p report/$DATE
+
+                cp output/report-${{github.event.client_payload.cve}}.md report/$DATE/cve-${{github.event.client_payload.cve}}.md
+                
                 cd report
                 git config user.name "report-bot"
                 git config user.email "bot@example.com"                
