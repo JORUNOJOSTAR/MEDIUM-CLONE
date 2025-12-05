@@ -4,6 +4,9 @@ on:
     repository_dispatch:
         types: [ping_cve]
     
+permissions:
+  contents: read
+    
 jobs:
     return:
         runs-on: ubuntu-latest
