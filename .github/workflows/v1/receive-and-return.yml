@@ -1,3 +1,5 @@
+# This version only receives a CVE via repository_dispatch event
+# and creates a markdown report file in another repository.
 name: Receive and Return CVE
 
 on:
