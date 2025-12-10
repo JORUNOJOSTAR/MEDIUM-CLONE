@@ -1,0 +1,70 @@
+# This version only receives a CVE via repository_dispatch event
+# and creates a markdown report file in another repository.
+name: Receive and Return CVE
+
+on:
+    repository_dispatch:
+        types: [scan_cve]
+    
+permissions:
+  actions: read
+  contents: read
+    
+jobs:
+    return:
+        runs-on: ubuntu-latest
+
+        env:
+          REPORT_REPO_TOKEN: ${{ secrets.VULN_REPORT_TOKEN }}
+          CVE              : ${{ github.event.client_payload.cve }}
+          CURRENT_REPO     : ${{ github.repository }}
+
+        steps:
+            - name: Setup Report Repository and Get AGENT MD FILE
+              run: |
+                git clone --depth 1 "https://x-access-token:$REPORT_REPO_TOKEN@github.com/willdo-naywin/VULN-REPORT.git" /tmp/report
+
+            - name: Checkout target-repo main branch 
+              uses: actions/checkout@v4
+              with:
+                ref: main
+                fetch-depth: 1
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 22
+                cache: 'npm'
+
+            - name: Setup Copilot CLI with npm
+              run: npm i -g @github/copilot
+
+            - name: Run Security Agent with Copilot CLI
+              env: 
+                COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+              run: |
+                echo "Checking file existence..."
+                [ -f "/tmp/report/.github/agents/security-agent.md" ] && echo "File exists!" || echo "File does not exist"
+                
+                echo "Reading agent file..."
+                PROMPT="$(cat /tmp/report/.github/agents/security-agent.md)"
+                PROMPT+=$'\n\nContext:\n'
+                PROMPT+="- Repository: $CURRENT_REPO"
+                PROMPT+=$'\n\nTask:\n'
+                PROMPT+=$"- $CVEについて現レポジトリ全体にあるコードを確認し、脆弱性レポートを作成してください。"
+                PROMPT+=$'\n- 作成したレポートは　/tmp/report/vuln-reports/'"$(date +"%Y-%m-%d")"'/'"$CURRENT_REPO"'/'"$CVE"'-脆弱性報告.md に保存してください。'
+                
+                echo "=== PROMPT CONTENT START ==="
+                echo "$PROMPT"
+                echo "=== PROMPT CONTENT END ==="
+                echo "Calling copilot..."
+                copilot --prompt "$PROMPT" --allow-all-tools --allow-all-paths < /dev/null
+
+            - name: Push to report-repo
+              run: |
+                cd /tmp/report
+                git config user.name "report-bot"
+                git config user.email "bot@example.com"                
+                git add .
+                git commit -m "CVE returned from target-repo"
+                git push
