@@ -18,11 +18,14 @@ jobs:
           REPORT_REPO_TOKEN: ${{ secrets.VULN_REPORT_TOKEN }}
           CVE              : ${{ github.event.client_payload.cve }}
           CURRENT_REPO     : ${{ github.repository }}
+          REPORT_OWNER     : ${{ github.event.client_payload.source_owner }}
+          REPORT_REPO      : ${{ github.event.client_payload.source_repo }}
+
 
         steps:
             - name: Setup Report Repository and Get AGENT MD FILE
               run: |
-                git clone --depth 1 "https://x-access-token:$REPORT_REPO_TOKEN@github.com/willdo-naywin/VULN-REPORT.git" /tmp/report
+                git clone --depth 1 "https://x-access-token:$REPORT_REPO_TOKEN@github.com/$REPORT_OWNER/$REPORT_REPO.git" /tmp/report
 
             - name: Checkout target-repo main branch 
               uses: actions/checkout@v4
