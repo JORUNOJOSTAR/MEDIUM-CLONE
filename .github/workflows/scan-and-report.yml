@@ -18,6 +18,7 @@ jobs:
           REPORT_REPO_TOKEN     : ${{ secrets.VULN_REPORT_TOKEN }}
           CVE                   : ${{ github.event.client_payload.cve }}
           REPORT_REPO           : ${{ github.event.client_payload.source_repo }}
+          COPILOT_MODEL         : ${{ github.event.client_payload.copilot_model }}
 
 
         steps:
@@ -65,7 +66,7 @@ jobs:
                 echo "$PROMPT"
                 echo "=== PROMPT CONTENT END ==="
                 echo "Calling copilot..."
-                copilot --prompt "$PROMPT" --allow-all-tools --allow-all-paths < /dev/null
+                copilot --prompt "$PROMPT" --model "$COPILOT_MODEL" --allow-all-tools --allow-all-paths < /dev/null
 
             - name: Push to report-repo
               run: |
