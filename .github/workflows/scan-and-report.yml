@@ -15,14 +15,18 @@ jobs:
         runs-on: ubuntu-latest
 
         env:
-          REPORT_REPO_TOKEN: ${{ secrets.VULN_REPORT_TOKEN }}
-          CVE              : ${{ github.event.client_payload.cve }}
-          CURRENT_REPO     : ${{ github.repository }}
-          REPORT_OWNER     : ${{ github.event.client_payload.source_owner }}
-          REPORT_REPO      : ${{ github.event.client_payload.source_repo }}
+          REPORT_REPO_TOKEN     : ${{ secrets.VULN_REPORT_TOKEN }}
+          CVE                   : ${{ github.event.client_payload.cve }}
+          REPORT_REPO           : ${{ github.event.client_payload.source_repo }}
 
 
         steps:
+            - name: Get repository name and set to env
+              run: |
+                full="${{ github.repository }}"
+                repo="${full##*/}"
+                echo "CURRENT_REPO_NAME=$repo" >> $GITHUB_ENV
+                
             - name: Setup Report Repository and Get AGENT MD FILE
               run: |
                 git clone --depth 1 "https://x-access-token:$REPORT_REPO_TOKEN@github.com/$REPORT_REPO.git" /tmp/report
@@ -52,10 +56,10 @@ jobs:
                 echo "Reading agent file..."
                 PROMPT="$(cat /tmp/report/.github/agents/security-agent.md)"
                 PROMPT+=$'\n\nContext:\n'
-                PROMPT+="- Repository: $CURRENT_REPO"
+                PROMPT+="- Repository: $CURRENT_REPO_NAME"
                 PROMPT+=$'\n\nTask:\n'
                 PROMPT+=$"- $CVEについて現レポジトリ全体にあるコードを確認し、脆弱性レポートを作成してください。"
-                PROMPT+=$'\n- 作成したレポートは　/tmp/report/vuln-reports/'"$(date +"%Y-%m-%d")"'/'"$CURRENT_REPO"'/'"$CVE"'-脆弱性報告.md に保存してください。'
+                PROMPT+=$'\n- 作成したレポートは　/tmp/report/vuln-reports/'"$(date +"%Y-%m-%d")"'/'"$CURRENT_REPO_NAME"'/'"$CVE"'-脆弱性報告.md に保存してください。'
                 
                 echo "=== PROMPT CONTENT START ==="
                 echo "$PROMPT"
